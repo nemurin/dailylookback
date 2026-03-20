@@ -11,3 +11,10 @@ Claudeがファイル削除する危険もあると学習
 ブロック崩し作成の様子を学習
 initでClaude.mdを作成
 planモードはeditしないと学習
+
+3章はMCP入門
+MCPとは外部との接続プロコトル
+ブラウザを操作するplaywrightのMCP
+Claude　MCPコマンドかjsonもあるよ
+Chromedevtoolはネットワークのデバッグもできる
+mastraはMCPを公開している
