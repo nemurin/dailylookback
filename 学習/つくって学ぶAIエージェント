@@ -56,4 +56,18 @@ AIはコードを生成する道具から、開発そのものを動かす存在
 
 🔸７章GithubActionsで開発ワークフローを自動化する
 🔸7.0これまでの振り返りとこの章で作るもの
+・ブラウザGUIではなくCLIとAPIによる構成パターン
 GithubCLI(gh)で全ての操作を行う
+・DevContainer環境でのGIthubCLIインストール
+🔸7.1最小構成で動かす
+・5行のワークフロから始める
+ActionsのワークフローでBun Run Agentを記入
+・ワークフローを実行する、Agentは呼び出せる
+Gh workflow run nano ~code.yml
+🔸7.2Secretsと権限
+GithubActionsはデフォルトで読み取り専用権限しかない
+ファイル編集、プルリクエスト、IssueコメントをWriteにする
+・SecretsとVariablesの登録
+VariablesにはLLM-PROVIDERとLLM-MODELを登録
+SecretsにはLLM~API-KEYを登録
+
