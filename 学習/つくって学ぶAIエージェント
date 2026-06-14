@@ -103,3 +103,5 @@ CreatePullRequestとCreateIssueCommentの２つ
 🔸7.10この章のまとめと次のステップ
 Nano~code-cliをGithubで自律的に動作させた
 段階的実装でActionsの問題とIssueの問題を分離できる
+人間の開発者がやっていることは自動化できた
+どこまで自由にさせるかの境界設計が大事
