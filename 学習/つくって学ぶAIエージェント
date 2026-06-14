@@ -70,4 +70,36 @@ GithubActionsはデフォルトで読み取り専用権限しかない
 ・SecretsとVariablesの登録
 VariablesにはLLM-PROVIDERとLLM-MODELを登録
 SecretsにはLLM~API-KEYを登録
-
+・モデルの選択基準
+軽いのは開発・テスト・CI用、高性能は複雑タスク用、コード特化もある
+・自動承認モードYOLOの実装
+YouOnlyLiveOnce「人生は一度きり」モード
+🔸7.3Git操作ツール
+・Createbranch ,Commit,Pushの流れ
+・Issue番号ベースのブランチ名
+🔸7.4GithubCLIによるプルリクエスト生成
+・Ghコマンドを選ぶ理由　ローカルとGithubActionsが同じコマンドになる
+🔸7.5Cli.tsへのツール組み込み　ImportでToolを入れる
+🔸7.6手動トリガーでの動作確認
+・CLIで環境変数を読む
+ISSUE-BODYでタスクを取得できるようにする
+・NanoCodeAction向けプロンプト
+プルリクエスト作成とIssueへの報告の責務を加える
+・NanoActions向けの権限緩和
+・ワークフローにInputsを追加する
+🔸7.7Issueイベントへの接続
+・自動トリガーの追加　Issue作成時にNanocodeを起動
+・入力ソースのハイブリッド化　ISSUEーBODYとISSUEーTEXTの設定
+・ISSUEのWRITE権限とAUTHORーASSOCIATION権限実装
+🔸7.8状況を認識して行動を変える　再実行への対応
+・強制チェックアウトで既存ブランチがある場合は削除
+・空コミットの防止
+・同じプルリクがある場合更新を実行
+🔸7.9完全なソースコード
+・Gitツール
+CretatebranchとCommitとPushbranchの３つ
+・Githubツール
+CreatePullRequestとCreateIssueCommentの２つ
+🔸7.10この章のまとめと次のステップ
+Nano~code-cliをGithubで自律的に動作させた
+段階的実装でActionsの問題とIssueの問題を分離できる
