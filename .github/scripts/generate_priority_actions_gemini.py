@@ -16,7 +16,7 @@ from zoneinfo import ZoneInfo
 import textwrap
 
 # Google Generative AI client
-import google.generativeai as genai
+from google import genai
 
 DIARY_DIR = "diary"
 OUTPUT_SUFFIX = "-actions.md"
