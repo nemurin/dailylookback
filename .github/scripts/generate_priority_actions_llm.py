@@ -9,7 +9,7 @@ import os
 import glob
 import datetime
 import re
-import openai
+from openai import OpenAI
 from zoneinfo import ZoneInfo
 
 DIARY_DIR = "diary"
@@ -74,8 +74,9 @@ def call_openai(system_prompt, user_prompt, model, max_tokens=400, temperature=0
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not set in environment")
-    openai.api_key = api_key
-    resp = openai.ChatCompletion.create(
+    
+    client = OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
         model=model,
         messages=[
             {"role": "system", "content": system_prompt},
@@ -84,7 +85,7 @@ def call_openai(system_prompt, user_prompt, model, max_tokens=400, temperature=0
         temperature=temperature,
         max_tokens=max_tokens,
     )
-    text = resp["choices"][0]["message"]["content"].strip()
+    text = response.choices[0].message.content.strip()
     return text
 
 def sanitize_and_ensure_md(text):
