@@ -76,7 +76,7 @@ def build_prompt(diary_text, schedule_text, n):
     return prompt
 
 
-def call_gemini(prompt, model_name, api_key, temperature=0.5, max_output_tokens=400):
+def call_gemini(prompt, model_name, api_key, temperature=0.5, max_output_tokens=1000):
     client = genai.Client(api_key=api_key)
     
     # リトライ処理
