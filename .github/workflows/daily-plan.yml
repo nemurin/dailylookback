@@ -33,7 +33,7 @@ jobs:
       - name: Generate priority actions (Gemini)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-3.8-flash' }}
+          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-2.5-flash' }}
           TZ: Asia/Tokyo
         run: |
           python3 .github/scripts/generate_priority_actions_gemini.py
