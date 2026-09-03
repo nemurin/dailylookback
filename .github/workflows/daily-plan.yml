@@ -30,9 +30,9 @@ jobs:
           MODEL: ${{ secrets.GEMINI_MODEL }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
-          python -m pip install --upgrade pip
-          pip install google-genai
-          python .github/scripts/generate_priority_actions_gemini.py
+            python -m pip install --upgrade pip
+            pip install google-generativeai  # Changed from google-genai
+            python .github/scripts/generate_priority_actions_gemini.py
 
       - name: Generate priority actions (Gemini)
         env:
