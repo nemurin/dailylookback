@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Generate priority actions using Google Generative AI (Gemini) via Vertex AI python client.
+Generate priority actions using Google Generative AI (Gemini).
 Writes diary/YYYY-MM-DD-actions.md
 
 Required env vars (set in Actions):
-- GCP_PROJECT: your Google Cloud project id
-- GCP_LOCATION: region, e.g. "asia-northeast1"
-- GCP_SA_KEY: **NOT** directly here — in Actions we'll write the secret JSON to a file and set GOOGLE_APPLICATION_CREDENTIALS
-- GEMINI_MODEL: model resource name (e.g. "models/text-bison@001" or "models/gemini-1.5"), optional
+- GEMINI_API_KEY: your Google AI API key (from secrets)
+- GEMINI_MODEL: model name (e.g. "gemini-1.5-flash"), optional
+- TZ: timezone (e.g. "Asia/Tokyo")
 """
 import os
 import glob
@@ -16,19 +15,20 @@ import datetime
 from zoneinfo import ZoneInfo
 import textwrap
 
-# Vertex AI client
-from google.cloud import aiplatform
+# Google Generative AI client
+import google.generativeai as genai
 
 DIARY_DIR = "diary"
 OUTPUT_SUFFIX = "-actions.md"
-TZ = ZoneInfo("Asia/Tokyo")
+TZ = ZoneInfo(os.getenv("TZ", "Asia/Tokyo"))
 PRIORITY_COUNT = int(os.getenv("PRIORITY_COUNT", "3"))
-GCP_PROJECT = os.getenv("GCP_PROJECT")
-GCP_LOCATION = os.getenv("GCP_LOCATION", "asia-northeast1")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "models/text-bison@001")  # 使いたいモデルに置き換えてください
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+
 
 def jst_today():
     return datetime.datetime.now(TZ).date()
+
 
 def find_yesterday_file():
     yesterday = jst_today() - datetime.timedelta(days=1)
@@ -44,12 +44,14 @@ def find_yesterday_file():
         return None
     return max(all_files, key=os.path.getmtime)
 
+
 def read_daily_schedule():
     p = "DailySchedule"
     if not os.path.exists(p):
         return ""
     with open(p, "r", encoding="utf-8") as f:
         return f.read()
+
 
 def build_prompt(diary_text, schedule_text, n):
     # トークン節約のため長文は短縮する（末尾優先）
@@ -74,18 +76,20 @@ def build_prompt(diary_text, schedule_text, n):
     """).strip()
     return prompt
 
-def call_gemini(prompt, model_name, project, location, temperature=0.2, max_output_tokens=400):
-    # Vertex AI を初期化してモデルに predict を投げる
-    aiplatform.init(project=project, location=location)
-    # TextGenerationModel API (aiplatform) を使える環境であることを前提にする
-    model = aiplatform.TextGenerationModel.from_pretrained(model_name)
-    response = model.predict(
+
+def call_gemini(prompt, model_name, api_key, temperature=0.2, max_output_tokens=400):
+    # Google Generative AI の API を初期化
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel(model_name)
+    response = model.generate_content(
         prompt,
-        max_output_tokens=max_output_tokens,
-        temperature=temperature,
+        generation_config=genai.types.GenerationConfig(
+            temperature=temperature,
+            max_output_tokens=max_output_tokens,
+        )
     )
-    # response は文字列を返す想定
     return response.text if hasattr(response, "text") else str(response)
+
 
 def sanitize_and_ensure_md(text):
     lines = [l for l in text.splitlines() if l.strip()]
@@ -93,6 +97,7 @@ def sanitize_and_ensure_md(text):
         # 箇条書きでないなら分割して付与
         lines = ["- " + l.strip() for l in lines if l.strip()]
     return "\n".join(lines)
+
 
 def write_output(out_path, source_path, llm_text):
     today = jst_today().isoformat()
@@ -108,9 +113,10 @@ def write_output(out_path, source_path, llm_text):
         f.write("\n".join(lines))
     print("Wrote priority actions to", out_path)
 
+
 def main():
-    if not GCP_PROJECT:
-        print("GCP_PROJECT not set. Set this env var in workflow.")
+    if not GEMINI_API_KEY:
+        print("GEMINI_API_KEY not set. Set this env var in workflow secrets.")
         return
     if not os.path.isdir(DIARY_DIR):
         print("No diary directory. Exiting.")
@@ -124,7 +130,7 @@ def main():
     schedule_text = read_daily_schedule()
     prompt = build_prompt(diary_text, schedule_text, PRIORITY_COUNT)
     try:
-        out = call_gemini(prompt, GEMINI_MODEL, GCP_PROJECT, GCP_LOCATION)
+        out = call_gemini(prompt, GEMINI_MODEL, GEMINI_API_KEY)
     except Exception as e:
         print("Gemini call failed:", e)
         return
@@ -132,6 +138,7 @@ def main():
     today = jst_today().isoformat()
     out_path = os.path.join(DIARY_DIR, f"{today}{OUTPUT_SUFFIX}")
     write_output(out_path, y_path, md)
+
 
 if __name__ == "__main__":
     main()
