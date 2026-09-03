@@ -27,7 +27,7 @@ jobs:
 
       - name: Install deps & run generator (debug)
         env:
-          MODEL: ${{ secrets.MODEL }}
+          MODEL: ${{ secrets.GEMINI_MODEL }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
           python -m pip install --upgrade pip
