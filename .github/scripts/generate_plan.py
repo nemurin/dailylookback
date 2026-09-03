@@ -16,18 +16,23 @@ def jst_today():
 
 def find_yesterday_file():
     yesterday = jst_today() - datetime.timedelta(days=1)
-    # try exact date file with and without extensions
-    for ext in ("", ".md", ".mdx", ".txt"):
-        p = os.path.join(DIARY_DIR, f"{yesterday.isoformat()}{ext}")
-        if os.path.exists(p):
-            return p
+    candidates = []
+    # try a few common filename patterns (with and without dashes) and with extensions
+    patterns = [
+        yesterday.isoformat(),                # 'YYYY-MM-DD'
+        yesterday.strftime('%Y%m%d'),         # 'YYYYMMDD'
+    ]
+    exts = ["", ".md", ".mdx", ".txt"]
+    for pfx in patterns:
+        for ext in exts:
+            p = os.path.join(DIARY_DIR, f"{pfx}{ext}")
+            if os.path.exists(p):
+                return p
     # fallback: most recently modified diary file (any file)
-    candidates = glob.glob(os.path.join(DIARY_DIR, "*"))
-    candidates = [c for c in candidates if os.path.isfile(c)]
-    if not candidates:
+    all_files = [c for c in glob.glob(os.path.join(DIARY_DIR, "*")) if os.path.isfile(c)]
+    if not all_files:
         return None
-    latest = max(candidates, key=os.path.getmtime)
-    return latest
+    return max(all_files, key=os.path.getmtime)
 
 def extract_action_items(text):
     lines = text.splitlines()
