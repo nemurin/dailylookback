@@ -25,18 +25,21 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Run diary -> plan & priority generator
+      - name: Install Python deps
+        run: pip install openai
+
+      - name: Generate priority actions (LLM)
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4o-mini # 任意で上書き可能
           TZ: Asia/Tokyo
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 .github/scripts/generate_plan.py || true
-          python3 .github/scripts/generate_priority_actions.py
+          python3 .github/scripts/generate_priority_actions_llm.py
 
       - name: Commit generated priority actions (if any)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add diary/*-actions.md || true
-          git commit -m "chore: generate today's priority actions" || echo "No changes to commit"
+          git commit -m "chore: generate today's priority actions (LLM)" || echo "No changes to commit"
           git push || echo "Push failed (maybe branch protection)."
