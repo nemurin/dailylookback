@@ -78,17 +78,18 @@ def build_prompt(diary_text, schedule_text, n):
 
 
 def call_gemini(prompt, model_name, api_key, temperature=0.2, max_output_tokens=400):
-    # Google Generative AI の API を初期化
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel(model_name)
-    response = model.generate_content(
-        prompt,
-        generation_config=genai.types.GenerationConfig(
-            temperature=temperature,
-            max_output_tokens=max_output_tokens,
-        )
+    # Google GenAI クライアントを初期化
+    client = genai.Client(api_key=api_key)
+
+    response = client.models.generate_content(
+        model=model_name,
+        contents=prompt,
+        config={
+            "temperature": temperature,
+            "max_output_tokens": max_output_tokens,
+        },
     )
-    return response.text if hasattr(response, "text") else str(response)
+    return response.text
 
 
 def sanitize_and_ensure_md(text):
