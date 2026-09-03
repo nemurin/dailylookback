@@ -16,15 +16,14 @@ def jst_today():
 
 def find_yesterday_file():
     yesterday = jst_today() - datetime.timedelta(days=1)
-    # try exact date file first
-    for ext in (".md", ".mdx", ".txt"):
+    # try exact date file with and without extensions
+    for ext in ("", ".md", ".mdx", ".txt"):
         p = os.path.join(DIARY_DIR, f"{yesterday.isoformat()}{ext}")
         if os.path.exists(p):
             return p
-    # fallback: most recently modified diary file
-    candidates = []
-    for ext in ("*.md","*.mdx","*.txt"):
-        candidates.extend(glob.glob(os.path.join(DIARY_DIR, ext)))
+    # fallback: most recently modified diary file (any file)
+    candidates = glob.glob(os.path.join(DIARY_DIR, "*"))
+    candidates = [c for c in candidates if os.path.isfile(c)]
     if not candidates:
         return None
     latest = max(candidates, key=os.path.getmtime)
