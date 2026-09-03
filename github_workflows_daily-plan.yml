@@ -1,0 +1,41 @@
+name: Create today's plan from yesterday's diary
+
+on:
+  schedule:
+    # Runs at 21:00 UTC => 06:00 JST (Asia/Tokyo)
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run diary -> plan generator
+        env:
+          TZ: Asia/Tokyo
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/generate_plan.py
+
+      - name: Commit generated plan (if any)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add diary/*
+          git commit -m "chore: generate today's plan from yesterday's diary" || echo "No changes to commit"
+          git push
