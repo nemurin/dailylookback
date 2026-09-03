@@ -51,8 +51,8 @@ def read_daily_schedule():
 def build_prompt(diary_text, schedule_text, n):
     def shrink(s, max_chars):
         return s if len(s) <= max_chars else s[-max_chars:]
-    diary_short = shrink(diary_text, 3000)
-    schedule_short = shrink(schedule_text, 1500)
+    diary_short = shrink(diary_text, 2500)
+    schedule_short = shrink(schedule_text, 1000)
 
     prompt = textwrap.dedent(f"""
     あなたは優秀で伴走型のパーソナルコーチです。
@@ -76,7 +76,7 @@ def build_prompt(diary_text, schedule_text, n):
     return prompt
 
 
-def call_gemini(prompt, model_name, api_key, temperature=0.5, max_output_tokens=1000):
+def call_gemini(prompt, model_name, api_key, temperature=0.5, max_output_tokens=400):
     client = genai.Client(api_key=api_key)
     
     # リトライ処理
