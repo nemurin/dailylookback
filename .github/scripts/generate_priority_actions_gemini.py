@@ -3,19 +3,14 @@
 """
 Generate priority actions using Google Generative AI (Gemini).
 Writes diary/YYYY-MM-DD-actions.md
-
-Required env vars (set in Actions):
-- GEMINI_API_KEY: your Google AI API key (from secrets)
-- GEMINI_MODEL: model name (e.g. "gemini-1.5-flash"), optional
-- TZ: timezone (e.g. "Asia/Tokyo")
 """
 import os
 import glob
 import datetime
+import time
 from zoneinfo import ZoneInfo
 import textwrap
 
-# Google Generative AI client
 from google import genai
 
 DIARY_DIR = "diary"
@@ -54,58 +49,62 @@ def read_daily_schedule():
 
 
 def build_prompt(diary_text, schedule_text, n):
-    # トークン節約のため長文は短縮する（末尾優先）
     def shrink(s, max_chars):
         return s if len(s) <= max_chars else s[-max_chars:]
-    diary_short = shrink(diary_text, 2500)
-    schedule_short = shrink(schedule_text, 1000)
-    prompt = textwrap.dedent(f"""
-    あなたは役に立つアシスタントです。以下を読み、今日（日本時間）の優先アクション上位 {n} 件を短い日本語のMarkdown箇条書きで出してください。
-    各行は「- アクション：理由（所要時間）」の形式にしてください。余計な説明は不要です。
+    diary_short = shrink(diary_text, 3000)
+    schedule_short = shrink(schedule_text, 1500)
 
-    昨日の日記:
+    prompt = textwrap.dedent(f"""
+    あなたは優秀で伴走型のパーソナルコーチです。
+    提供された「直近の日記」と「基本スケジュール」の内容を分析し、今日（日本時間）取り組むべき優先アクション上位 {n} 件を提案してください。
+
+    ### 直近の日記
     {diary_short}
 
-    DailySchedule:
+    ### DailySchedule (基本スケジュール)
     {schedule_short}
 
-    出力ルール:
-    - 箇条書きのみ（各行は - で始める）
-    - 各項目は「アクション：理由（所要時間）」の形式
-    - 実行しやすさ（短時間で終わる）を優先する
+    ### 出力要件
+    1. **本日のワンポイントメッセージ**: 昨日の振り返りから見えた課題やポジティブな側面に触れる一言（2〜3文）。
+    2. **優先アクション（上位 {n} 件）**: 各アクションについて、以下の要素を含めた読みやすいフォーマットで記述してください。
+       - タイトル（絵文字 + 明確な行動）
+       - 理由（なぜ今やるべきか・日記のどの課題に対応しているか）
+       - 具体的な手順 / 実行のコツ（すぐ着手できるレベルまで分解）
+       - 見込み時間（例: 5分, 15分）
+    3. 全体的に前向きで、すぐ行動に移したくなるトーンにしてください。
     """).strip()
     return prompt
 
 
-def call_gemini(prompt, model_name, api_key, temperature=0.2, max_output_tokens=400):
-    # Google GenAI クライアントを初期化
+def call_gemini(prompt, model_name, api_key, temperature=0.5, max_output_tokens=1000):
     client = genai.Client(api_key=api_key)
-
-    response = client.models.generate_content(
-        model=model_name,
-        contents=prompt,
-        config={
-            "temperature": temperature,
-            "max_output_tokens": max_output_tokens,
-        },
-    )
-    return response.text
-
-
-def sanitize_and_ensure_md(text):
-    lines = [l for l in text.splitlines() if l.strip()]
-    if not any(l.strip().startswith("-") for l in lines):
-        # 箇条書きでないなら分割して付与
-        lines = ["- " + l.strip() for l in lines if l.strip()]
-    return "\n".join(lines)
+    
+    # リトライ処理
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config={
+                    "temperature": temperature,
+                    "max_output_tokens": max_output_tokens,
+                },
+            )
+            return response.text
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise e
+            print(f"Attempt {attempt + 1} failed ({e}). Retrying in 5 seconds...")
+            time.sleep(5)
 
 
 def write_output(out_path, source_path, llm_text):
     today = jst_today().isoformat()
     lines = []
-    lines.append(f"# Priority actions for {today}")
+    lines.append(f"# 🎯 Priority Actions for {today}")
     lines.append("")
-    lines.append(f"_Generated from {os.path.basename(source_path)} (via Gemini)_")
+    lines.append(f"> _Generated from `{os.path.basename(source_path)}` via Gemini_")
     lines.append("")
     lines.append(llm_text)
     lines.append("")
@@ -135,10 +134,10 @@ def main():
     except Exception as e:
         print("Gemini call failed:", e)
         return
-    md = sanitize_and_ensure_md(out)
+    
     today = jst_today().isoformat()
     out_path = os.path.join(DIARY_DIR, f"{today}{OUTPUT_SUFFIX}")
-    write_output(out_path, y_path, md)
+    write_output(out_path, y_path, out)
 
 
 if __name__ == "__main__":
