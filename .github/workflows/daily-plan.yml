@@ -2,8 +2,8 @@ name: Create today's plan from yesterday's diary
 
 on:
   schedule:
-    # Runs at 21:00 UTC => 06:00 JST (Asia/Tokyo)
-    - cron: '0 21 * * *'
+    # Runs at 19:00 UTC => 04:00 JST (Asia/Tokyo)
+    - cron: '0 19 * * *'
   workflow_dispatch:
 
 permissions:
