@@ -122,3 +122,20 @@ Claude.aiのアカウントを作成
 
 2.3　API従量課金で使う準備をしよう
 2.3.1　Claude Consoleのアカウントとクレジットを準備しよう
+・コンソールのアカウントを登録する
+個人利用か組織利用かを選ぶ
+・クレジットを購入する
+SettingのBillingからBuyCreditsを選択
+・Billingページで残高を確認する
+Billingページで残高が確認でき、BuyCreditsでいつでも買える
+AutoReloadもできます
+
+2.4　ClaudeCodeをインストールしてみよう
+2.4.1　インストール方法を知ろう
+OSのパッケージマネージャを介さないネイティブインストールがおすすめ
+
+2.4.2 Windowsでインストールしよう
+・PowerShellを開く
+irm https://claude.ai/install.ps1 l iex
+・コマンドプロンプトでインストールする
+curl -fsSL https://claude.ai/install.cmd -o && install.cmd && del install.cmd
