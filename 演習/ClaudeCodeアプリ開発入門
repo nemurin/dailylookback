@@ -139,3 +139,29 @@ OSのパッケージマネージャを介さないネイティブインストー
 irm https://claude.ai/install.ps1 l iex
 ・コマンドプロンプトでインストールする
 curl -fsSL https://claude.ai/install.cmd -o && install.cmd && del install.cmd
+
+2.4.3 macosでインストールしよう
+・ターミナルを開く
+curl -fsSL https://claude.ai/install.sh l bash
+
+2.4.4 ログインしてアカウントを選ぼう
+claudeでログインウィザードを起動
+Darkmode,Claude　Accountでログイン実施
+
+2.4.5 API従量課金でログインしよう
+Anthropic Consoleでログインを選ぶ
+SettingsのAPI Keysを確認
+
+2.4.6 アップデート方法を知ろう
+・手動で最新版を適用
+claude update
+
+2.5 claude doctorでclaude codeの動作確認をしよう
+2.5.1　claude doctorの役割を知ろう　インストール状態診断コマンド
+2.5.2　claude doctorを実行してみよう
+2.5.3　出力結果を読み解こう　No instalation issues foundかInvalid　Settings
+
+2.6 はじめてのClaudeCode
+2.6.1
+2.6.2
+2.6.3
